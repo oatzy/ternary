@@ -44,5 +44,5 @@ def main():
     json.dump(counts, args.output)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

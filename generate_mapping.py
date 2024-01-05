@@ -7,23 +7,28 @@ from functools import lru_cache
 from math import log
 from string import ascii_lowercase
 
-TERNARY = [str(i)+str(j)+str(k) for i in range(3) for j in range(3) for k in range(3)]
+TERNARY = [str(i) + str(j) + str(k) for i in range(3) for j in range(3) for k in range(3)]
+
 
 def entropy(p, base=3):
     return -p * log(p, base)
 
+
 def score_balance(bits):
     c = Counter(bits)
     total = sum(c.values())
-    return sum(b and entropy(b/total) for b in c.values())
+    return sum(b and entropy(b / total) for b in c.values())
+
 
 def score_spread(bits):
-    return sum(i!=j for i,j in zip(bits, bits[1:]))/(len(bits)-1)
+    return sum(i != j for i, j in zip(bits, bits[1:])) / (len(bits) - 1)
+
 
 BIT_SCORES = {
-    (i,j): score_balance(TERNARY[i] + TERNARY[j]) * score_spread(TERNARY[i] + TERNARY[j])
-    for i,j in product(range(27), range(27))
+    (i, j): score_balance(TERNARY[i] + TERNARY[j]) * score_spread(TERNARY[i] + TERNARY[j])
+    for i, j in product(range(27), range(27))
 }
+
 
 def calculate_score(arrangement, frequencies):
     total = 0
@@ -53,11 +58,10 @@ def main():
     score = calculate_score(arr, frequencies)
     swaps = 0
     for t in range(args.iterations):
-
         i = random.randint(1, 26)
         j = random.randint(1, 26)
         if i == j:
-            j = max(1, 17 * j % 26) 
+            j = max(1, 17 * j % 26)
 
         arr[i], arr[j] = arr[j], arr[i]
 
@@ -83,6 +87,5 @@ def main():
         print(f'{c} -> {"".join(str(b) for b in TERNARY[i])}')
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
