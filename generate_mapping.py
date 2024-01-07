@@ -3,7 +3,6 @@ import random
 from argparse import ArgumentParser, FileType
 from collections import Counter
 from itertools import product
-from functools import lru_cache
 from math import log
 from string import ascii_lowercase
 
@@ -38,40 +37,56 @@ def calculate_score(arrangement, frequencies):
     return total
 
 
-def should_keep(t):
-    return t < 10  # random.random() > 0.9
+def generate_mapping(frequencies):
+    arr = [" "] + random.sample(ascii_lowercase, 26)
+
+    score = calculate_score(arr, frequencies)
+    while True:
+        old_score = score
+        for i in range(1, 27):
+            best = i
+            for j in range(i + 1, 27):
+                arr[i], arr[j] = arr[j], arr[i]
+
+                new_score = calculate_score(arr, frequencies)
+
+                if new_score >= score:
+                    score = new_score
+                    best = j
+
+                arr[i], arr[j] = arr[j], arr[i]
+
+            arr[i], arr[best] = arr[best], arr[i]
+
+        if score == old_score:
+            break
+
+    return arr, score
 
 
 def main():
     parser = ArgumentParser()
     parser.add_argument("frequencies", type=FileType("r"))
-    parser.add_argument("-i", "--initial", default=ascii_lowercase)
-    parser.add_argument("-n", "--iterations", type=int, default=10_000)
+    parser.add_argument("-n", "--iterations", type=int, default=100)
     parser.add_argument("-p", "--pretty", action="store_true")
+    parser.add_argument("--score", help="return the score of an existing mapping")
 
     args = parser.parse_args()
 
     frequencies = json.load(args.frequencies)
-    arr = [" "] + [c for c in args.initial if c in ascii_lowercase]
-    assert len(arr) == 27, "Missing characters"
 
-    score = calculate_score(arr, frequencies)
-    swaps = 0
-    for t in range(args.iterations):
-        i = random.randint(1, 26)
-        j = random.randint(1, 26)
-        if i == j:
-            j = max(1, 17 * j % 26)
+    if args.score:
+        arr = [" "] + list(args.score)
+        score = calculate_score(arr, frequencies)
 
-        arr[i], arr[j] = arr[j], arr[i]
-
-        new_score = calculate_score(arr, frequencies)
-
-        if new_score >= score or should_keep(t):
-            score = new_score
-            swaps += 1
-        else:
-            arr[i], arr[j] = arr[j], arr[i]
+    else:
+        score = 0
+        arr = []
+        for _ in range(args.iterations):
+            new_arr, new_score = generate_mapping(frequencies)
+            if new_score > score:
+                score = new_score
+                arr = new_arr
 
     score /= sum(frequencies.values())
 
@@ -80,7 +95,6 @@ def main():
         return
 
     print("Score:", score)
-    print("Swaps:", swaps)
     print("Mapping:\n")
 
     for c, i in sorted(((c, i) for i, c in enumerate(arr))):
