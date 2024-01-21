@@ -2,7 +2,7 @@ import json
 import sys
 
 from argparse import ArgumentParser, FileType
-from collections import Counter
+from collections import Counter, deque
 from itertools import chain
 from string import ascii_lowercase
 
@@ -13,7 +13,7 @@ ALLOW_CHARS = ascii_lowercase
 def count_ngrams(chars, n=2):
     counts = Counter()
 
-    cur = [" "]
+    cur = deque([" "], n)
     for c in chars:
         c = c.lower()
 
@@ -25,7 +25,6 @@ def count_ngrams(chars, n=2):
         cur.append(c)
 
         if len(cur) >= n:
-            cur = cur[-n:]
             counts.update(["".join(cur)])
 
     return counts
