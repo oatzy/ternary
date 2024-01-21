@@ -10,3 +10,15 @@ There are three scripts, which feed into each other:
 3) use the generated mapping to translate an input text into a base 3 string
 
 The format for the generate mappings is a string of the alphabet such that the first character maps to 1, the second to 2, etc.
+
+## example
+
+```bash
+$ python3 count_ngrams.py frankenstein.txt -o bigrams.json
+
+$ python3 generate_mapping.py bigrams.json 
+kvughlecjitpzyodbxrnawsmfq:0.6686863032384452
+
+$ echo "Hello, World!" | python3 encode.py - -m kvughlecjitpzyodbxrnawsmfq -s" "
+012 021 020 020 120 000 211 120 201 020 121 000
+```
