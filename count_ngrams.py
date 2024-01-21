@@ -1,3 +1,11 @@
+"""Count the number of n-grams (substrings of letters) in an input text
+
+Output is a json dictionary of n-grams to total counts
+
+Only considers alphabetical characters (normalised to lowercase) and white space. 
+Any other character is treated as white space (making them effective word boundries)
+and repeated white space characters are de-duplicated.
+"""
 import json
 import sys
 
@@ -24,17 +32,21 @@ def count_ngrams(chars, n=2):
 
         cur.append(c)
 
-        if len(cur) >= n:
-            counts.update(["".join(cur)])
+        if len(cur) < n:
+            continue
+
+        counts.update(["".join(cur)])
 
     return counts
 
 
 def main():
     parser = ArgumentParser()
-    parser.add_argument("input", type=FileType("r"))
-    parser.add_argument("-n", default=2, type=int)
-    parser.add_argument("-o", "--output", type=FileType("w"), default=sys.stdout)
+    parser.add_argument("input", type=FileType("r"), help="Input file path or - to read from stdin")
+    parser.add_argument("-n", default=2, type=int, help="size of n-gram to count")
+    parser.add_argument(
+        "-o", "--output", type=FileType("w"), default=sys.stdout, help="Output file or stdout by default"
+    )
 
     args = parser.parse_args()
 
